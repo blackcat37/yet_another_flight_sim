@@ -54,6 +54,8 @@ void bank_iteration(void* bank, int time)
 
     float aileron_angle = ptr->aileron->get_angle(ptr->aileron);
 
+    //todo: if aileron_angle is out of range - skip this turn
+
     if (ptr->angle == ptr->target && aileron_angle == 0.0f)
     {
         ptr->last_time = time;

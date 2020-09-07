@@ -49,6 +49,8 @@ void turn_iteration(void* course, int time)
 
     float bank_angle = ptr->bank->get_angle(ptr->bank);
 
+    //todo: if bank_angle is out of range - skip this turn
+
     if (ptr->heading == ptr->target && bank_angle == 0.0f)
     {
         ptr->last_time = time;
@@ -64,6 +66,19 @@ void turn_iteration(void* course, int time)
 
     float angle_error = ptr->target - ptr->heading;
     float imp = pid_update(ptr->pid, angle_error, time);
+
+    float new_turn_speed = (float)(((9.81 * tan(imp * 0.01745)) / ptr->plane_speed) * 57.296);
+    float new_load = (float)(1 / cos(imp * 0.01745));
+
+    if (fabs(new_turn_speed) > 3.0f || fabs(new_load) > 1.5f)
+    {
+        if (imp < 0)
+            imp += 1;
+        else if (imp > 0)
+            imp -= 1;
+        new_turn_speed = (float)(((9.81 * tan(imp * 0.01745)) / ptr->plane_speed) * 57.296);
+        new_load = (float)(1 / cos(imp * 0.01745));
+    }
 
     ptr->bank->set_target(ptr->bank, imp);// (ptr->heading - ptr->target) * -1);
 
